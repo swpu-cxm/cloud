@@ -15,7 +15,7 @@
   
     pipenv shell  
   
-### 2.  在settings.py中配置数据库信息,调试时请设置DEBUG=True,然后简历数据库模型
+### 2.  在settings.py中配置数据库信息,调试时请设置DEBUG=True,然后建立据库模型
 
     python manage.py makemigrations  
     python manage.py migrate  
