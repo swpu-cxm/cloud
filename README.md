@@ -10,7 +10,8 @@
   
 ## 如何使用:
 ### 1. 安装虚拟环境
-  
+    cd cloud  
+    
     pipenv install --dev  
   
     pipenv shell  
