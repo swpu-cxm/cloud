@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>我的云盘</title>
+
+    <script src="../static/jquery-3.3.1.js"></script>
+    <link rel="stylesheet" href="../static/bootstrap/css/bootstrap.css">
+    <script src="../static/bootstrap/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="../static/index.css">
+    <script src="../static/index.js"></script>
+</head>
+<body>
+<!--顶部导航栏开始-->
+<div class="row bg-info">
+    <div class="col-sm-3" style="margin-left: 5%">
+        <h1>我的网盘</h1>
+    </div>
+    <div class="col-sm-1 col-sm-offset-5">
+        <a href="#"><h3>{{ username }}</h3></a>
+    </div>
+    <div class="col-sm-1">
+        <a href="/logout/"><h3>注销</h3></a>
+    </div>
+</div>
+<!--顶部导航栏结束-->
+
+<div style="margin-top: 20px">
+    <div class="row">
+        <!--左侧分类标签开始-->
+        <div class="col-sm-2">
+            <ul class="nav nav-pills nav-tabs nav-stacked tabbable faq-tabbable">
+                <li role="presentation" class="active"><a href="javascript:void(0)" class="classify_link"
+                                                          id="all">所有文件</a></li>
+                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="doc">文档</a></li>
+                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="img">图片</a></li>
+                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="video">影音</a></li>
+                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="procedure">应用</a></li>
+                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="others">其他</a></li>
+
+            </ul>
+        </div>
+        <!--左侧分类标签结束-->
+        <!--右侧文件表格开始-->
+        <div class="col-sm-10">
+            <!--文件路径导航开始-->
+            <div class="row">
+                <div class="col-sm-10">
+
+
+                    <div class="input-group">
+                        <input type="text" class="form-control search-input" aria-label="...">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false" style="width: 100px">分类<span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right">
+                                <li><a href="javascript:void(0)" class="search_link" name="all">所有</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="javascript:void(0)" class="search_link" name="doc">文档</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="javascript:void(0)" class="search_link" name="img">图片</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="javascript:void(0)" class="search_link" name="video">影音</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="javascript:void(0)" class="search_link" name="procedure">应用</a></li>
+                                <li role="separator" class="divider"></li>
+                                <li><a href="javascript:void(0)" class="search_link" name="others">其他</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-sm-2">
+                    <!--上传文件模态框开始-->
+                    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+                        上传文件
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                            aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="myModalLabel">上传文件</h4>
+                                </div>
+                                <form action="/upload_file/" enctype="multipart/form-data" method="post">
+                                    <div class="modal-body" style="height: 90px">
+                                        {% csrf_token %}
+                                        <a href='javascript:void(0);' class="blueButton">选择文件</a>
+                                        <input type="file" class="myFileUpload" name="file"/>
+                                        <div class="show"></div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-danger pull-left" data-dismiss="modal">关闭
+                                        </button>
+                                        <input class="btn btn-info" type="submit" value="上传">
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!--上传文件模态框结束-->
+
+                </div>
+            </div>
+
+            <!--文件路径导航结束-->
+            <table class="table table-hover" id="myTable">
+                <thead>
+                <tr>
+                    <th>文件名</th>
+                    <th>大小</th>
+                    <th>时间</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for file in file_list %}
+                    <tr>
+                        <td><a href="../static{{ file.full_path }}">{{ file.file_name }}</a></td>
+                        <td>{{ file.file_size }}</td>
+                        <td>{{ file.update_time }}</td>
+                        <td>
+                            <a href="/download_file/?file_path={{ file.full_path }}">下载</a>
+                            &nbsp;&nbsp;&nbsp;
+                            <a href="/delete_file/?file_path={{ file.full_path }}">删除</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <!--右侧文件表格结束-->
+        </div>
+
+    </div>
+</div>
+
+
+</body>
+</html>
