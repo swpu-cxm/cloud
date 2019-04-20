@@ -1,27 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4795e16c-fff8-48c3-9337-541122048c29" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/cloud.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cloud.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/554f6ae3-71e5-4c19-b236-42b857a74596.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/554f6ae3-71e5-4c19-b236-42b857a74596/storage_v2/_src_/schema/sakila.oXLGyQ.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/554f6ae3-71e5-4c19-b236-42b857a74596/storage_v2/_src_/schema/sakila.oXLGyQ.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/554f6ae3-71e5-4c19-b236-42b857a74596/storage_v2/_src_/schema/sys.zb4BAA.meta" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/554f6ae3-71e5-4c19-b236-42b857a74596/storage_v2/_src_/schema/sys.zb4BAA.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/cloud/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cloud/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/cloud/urls.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index/migrations/0001_initial.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/index/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/index/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index/untils.py" beforeDir="false" afterPath="$PROJECT_DIR$/index/untils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/index/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
-    </list>
+    <list default="true" id="4795e16c-fff8-48c3-9337-541122048c29" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -395,16 +375,15 @@
       <workItem from="1555563398686" duration="3412000" />
       <workItem from="1555567829598" duration="18946000" />
       <workItem from="1555638240792" duration="44229000" />
-      <workItem from="1555719449052" duration="13870000" />
+      <workItem from="1555719449052" duration="14563000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="182170000" />
+    <option name="totallyTimeSpent" value="182863000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="2062" height="1126" extended-state="6" />
-    <editor active="true" />
+    <frame x="-7" y="-7" width="2062" height="1126" extended-state="7" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14620759" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
