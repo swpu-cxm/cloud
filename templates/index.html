@@ -9,6 +9,8 @@
     <script src="../static/bootstrap/js/bootstrap.js"></script>
     <link rel="stylesheet" href="../static/index.css">
     <script src="../static/index.js"></script>
+    <script src="../static/jquery.cookie.js"></script>
+    <link rel="stylesheet" href="../static/fontawesome/css/font-awesome.css">
 </head>
 <body>
 <!--顶部导航栏开始-->
@@ -30,12 +32,15 @@
         <!--左侧分类标签开始-->
         <div class="col-sm-2">
             <ul class="nav nav-pills nav-tabs nav-stacked tabbable faq-tabbable">
-                <li role="presentation" class="active"><a href="javascript:void(0)" class="classify_link"
-                                                          id="all">所有文件</a></li>
-                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="doc">文档</a></li>
-                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="img">图片</a></li>
-                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="video">影音</a></li>
-                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="procedure">应用</a></li>
+                <li role="presentation" class="active"><a href="/"><i class="fa fa-file-o fa-lg"></i> 所有文件</a></li>
+                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="doc">
+                    <i class="fa fa-file-word-o fa-lg" aria-hidden="true"></i> 文档</a></li>
+                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="img">
+                    <i class="fa fa-file-photo-o fa-lg" aria-hidden="true"></i> 图片</a></li>
+                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="video">
+                    <i class="fa fa-file-video-o fa-lg" aria-hidden="true"></i> 影音</a></li>
+                <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="procedure">
+                    <i class="fa fa-android fa-lg" aria-hidden="true"></i> 应用</a></li>
                 <li role="presentation"><a href="javascript:void(0)" class="classify_link" id="others">其他</a></li>
 
             </ul>
@@ -45,25 +50,42 @@
         <div class="col-sm-10">
             <!--文件路径导航开始-->
             <div class="row">
-                <div class="col-sm-10">
-
+                <dic class="col-sm-4">
+                    <ol class="breadcrumb">
+                        {% for breadcrumb in breadcrumb_list %}
+                            {% if not forloop.last %}
+                                <li><a href="/folder/?pdir={{ breadcrumb.uri }}">{{ breadcrumb.tag }}</a></li>
+                            {% else %}
+                                <li class="active"><span id="pwd" hidden>{{ breadcrumb.uri }}</span>{{ breadcrumb.tag }}
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ol>
+                </dic>
+                <div class="col-sm-4">
 
                     <div class="input-group">
                         <input type="text" class="form-control search-input" aria-label="...">
                         <div class="input-group-btn">
                             <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false" style="width: 100px">分类<span class="caret"></span>
+                                    aria-haspopup="true" aria-expanded="false" style="width: 100px">分类<span
+                                    class="caret"></span>
                             </button>
                             <ul class="dropdown-menu dropdown-menu-right">
-                                <li><a href="javascript:void(0)" class="search_link" name="all">所有</a></li>
+                                <li><a href="javascript:void(0)" class="search_link" name="all">
+                                    <i class="fa fa-file-o fa-lg"></i> 所有</a></li>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="javascript:void(0)" class="search_link" name="doc">文档</a></li>
+                                <li><a href="javascript:void(0)" class="search_link" name="doc">
+                                    <i class="fa fa-file-word-o fa-lg" aria-hidden="true"></i> 文档</a></li>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="javascript:void(0)" class="search_link" name="img">图片</a></li>
+                                <li><a href="javascript:void(0)" class="search_link" name="img">
+                                    <i class="fa fa-file-photo-o fa-lg" aria-hidden="true"></i> 图片</a></li>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="javascript:void(0)" class="search_link" name="video">影音</a></li>
+                                <li><a href="javascript:void(0)" class="search_link" name="video">
+                                    <i class="fa fa-file-video-o fa-lg" aria-hidden="true"></i> 影音</a></li>
                                 <li role="separator" class="divider"></li>
-                                <li><a href="javascript:void(0)" class="search_link" name="procedure">应用</a></li>
+                                <li><a href="javascript:void(0)" class="search_link" name="procedure">
+                                    <i class="fa fa-android fa-lg" aria-hidden="true"></i> 应用</a></li>
                                 <li role="separator" class="divider"></li>
                                 <li><a href="javascript:void(0)" class="search_link" name="others">其他</a></li>
                             </ul>
@@ -71,7 +93,7 @@
                     </div>
 
                 </div>
-                <div class="col-sm-2">
+                <div class="col-sm-4">
                     <!--上传文件模态框开始-->
                     <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
                         上传文件
@@ -85,17 +107,59 @@
                                             aria-hidden="true">&times;</span></button>
                                     <h4 class="modal-title" id="myModalLabel">上传文件</h4>
                                 </div>
-                                <form action="/upload_file/" enctype="multipart/form-data" method="post">
-                                    <div class="modal-body" style="height: 90px">
-                                        {% csrf_token %}
-                                        <a href='javascript:void(0);' class="blueButton">选择文件</a>
-                                        <input type="file" class="myFileUpload" name="file"/>
-                                        <div class="show"></div>
+                                <div class="modal-body" style="height: 90px">
+
+                                    <a href='javascript:void(0);' class="blueButton">选择文件</a>
+                                    <input type="file" class="myFileUpload" name="file" id="file">
+                                    <div class="show"></div>
+                                    <div class="progress" hidden style="margin-top: 60px">
+                                        <div class="progress-bar progress-bar-success progress-bar-striped active"
+                                             role="progressbar"
+                                             aria-valuenow="45" aria-valuemin="0"
+                                             aria-valuemax="100" style="width: 0%" id="prog">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger pull-left" data-dismiss="modal">关闭
+                                    </button>
+                                    <button id="upload" class="btn btn-info">上传</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--上传文件模态框结束-->
+
+                    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal2">
+                        新建文件夹
+                    </button>
+                    <!-- Modal -->
+                    <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                                            aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="myModalLabel">新建文件夹</h4>
+                                </div>
+                                <form action="/mkdir/" method="get">
+                                    <div class="modal-body">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" id="basic-addon1">文件夹名:</span>
+                                            <input type="text" id="absdir" name="pwd" hidden>
+                                            <script>
+                                                var dir = $('#pwd').text();
+                                                $('#absdir').val(dir);
+                                            </script>
+                                            <input type="text" class="form-control" placeholder="新建文件夹"
+                                                   aria-describedby="basic-addon1" name="folder_name">
+                                        </div>
                                     </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-danger pull-left" data-dismiss="modal">关闭
                                         </button>
-                                        <input class="btn btn-info" type="submit" value="上传">
+                                        <input type="submit" value="新建" class="btn btn-info">
                                     </div>
                                 </form>
                             </div>
@@ -110,23 +174,159 @@
             <table class="table table-hover" id="myTable">
                 <thead>
                 <tr>
-                    <th>文件名</th>
-                    <th>大小</th>
-                    <th>时间</th>
-                    <th>操作</th>
+                    <th style="width: 40%">文件名</th>
+                    <th style="width: 15%">大小</th>
+                    <th style="width: 15%">时间</th>
+                    <th style="width: 30%">操作</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% for file in file_list %}
+                {% for file in index_list %}
                     <tr>
-                        <td><a href="../static{{ file.full_path }}">{{ file.file_name }}</a></td>
-                        <td>{{ file.file_size }}</td>
+                        {% if file.is_file %}
+                            <td style="text-align: left"><a href="/static/{{ file.file_path }}">
+                                <i class="fa fa-file fa-lg"></i> {{ file.file_name }}</a></td>
+                        {% else %}
+                            <td style="text-align: left"><a
+                                    href="/folder/?pdir={{ file.belong_folder }}{{ file.folder_name }}" class="dir"
+                                    name=""><i class="fa fa-folder-o fa-lg"></i> {{ file.folder_name }}</a></td>
+                        {% endif %}
+                        {% if file.is_file %}
+                            <td>{{ file.file_size }}</td>
+                        {% else %}
+                            <td>---</td>
+                        {% endif %}
                         <td>{{ file.update_time }}</td>
-                        <td>
-                            <a href="/download_file/?file_path={{ file.full_path }}">下载</a>
-                            &nbsp;&nbsp;&nbsp;
-                            <a href="/delete_file/?file_path={{ file.full_path }}">删除</a>
-                        </td>
+                        {% if file.is_file %}
+                            <td>
+                                <a class="btn btn-success" href="/download_file/?file_path={{ file.file_path }}">
+                                    <i class="fa fa-cloud-download fa-lg" aria-hidden="true"></i> 下载
+                                </a>
+                                <button class="btn btn-warning rename_file" data-toggle="modal"
+                                        data-target="#FileModal{{ file.id }}">
+                                    <i class="fa fa-gear fa-lg" aria-hidden="true"></i> 重命名
+                                </button>
+                                <!--重命名文件模态框开始-->
+
+                                <div class="modal fade" id="FileModal{{ file.id }}" tabindex="-1" role="dialog"
+                                     aria-labelledby="myModalLabel">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close"><span
+                                                        aria-hidden="true">&times;</span></button>
+                                                <h4 class="modal-title" id="myModalLabel">重命名</h4>
+                                            </div>
+                                            <form action="/rename_file/" method="get">
+                                                <div class="modal-body">
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon" id="basic-addon1">新文件名:</span>
+                                                        <input id="renamefile_{{ file.id }}" type="text" name="pwd"
+                                                               hidden>
+                                                        <input id="filename_{{ file.id }}" type="text"
+                                                               value="{{ file.file_name }}"
+                                                               name="old_file_name" hidden>
+                                                        <script>
+                                                            var dir = $('#pwd').text();
+                                                            $('#renamefile_{{ file.id }}').val(dir);
+                                                        </script>
+                                                        <input type="text" class="form-control" id="newfolder{{ file.id }}"
+                                                               placeholder="{{ file.file_name }}" name="new_file_name">
+                                                        <span class="input-group-addon" id="basic-addon_{{ file.id }}"></span>
+                                                        <script>
+                                                            var file_name = '{{ file.file_name }}'.split('.')[0];
+                                                            var file_type = '{{ file.file_name }}'.split('.')[1];
+                                                            $('#newfolder{{ file.id }}').attr('placeholder', file_name);
+                                                            $('#basic-addon_{{ file.id }}').text('.'+file_type);
+                                                        </script>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-danger pull-left"
+                                                            data-dismiss="modal">关闭
+                                                    </button>
+                                                    <input type="submit" value="重命名" class="btn btn-info">
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--重命名文件模态框结束-->
+                                <a class="btn btn-danger" id="deletefile_{{ file.id }}">
+                                    <i class="fa fa-trash fa-lg" aria-hidden="true"></i> 删除</a>
+                                <script>
+                                    var pwd = $('#pwd').text();
+                                    var folder_name = '{{ file.folder_name }}';
+                                    $('#deletefile_{{ file.id }}').attr('href', '/delete_file/?pwd=' + pwd + '&file_path=' + '{{ file.file_path }}');
+                                </script>
+                            </td>
+                        {% else %}
+                            <td>
+                                <button class="btn btn-warning rename_file" data-toggle="modal"
+                                        data-target="#FolderModal{{ file.id }}">
+                                    <i class="fa fa-gear fa-lg" aria-hidden="true"></i> 重命名
+                                </button>
+                                <!---->
+
+                                <div class="modal fade" id="FolderModal{{ file.id }}" tabindex="-1" role="dialog"
+                                     aria-labelledby="myModalLabel">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close"><span
+                                                        aria-hidden="true">&times;</span></button>
+                                                <h4 class="modal-title" id="myModalLabel">重命名</h4>
+                                            </div>
+                                            <form action="/rename_folder/" method="get">
+                                                <div class="modal-body">
+                                                    <div class="input-group">
+                                                        <span class="input-group-addon" id="basic-addon1">新文件夹名:</span>
+                                                        <input id="renamefolder_{{ file.folder_name }}" type="text"
+                                                               name="pwd" hidden>
+                                                        <input type="text" value="{{ file.folder_name }}"
+                                                               name="old_folder_name" hidden>
+                                                        <script>
+                                                            var dir = $('#pwd').text();
+                                                            $('#renamefolder_{{ file.folder_name }}').val(dir);
+                                                        </script>
+                                                        <input type="text" class="form-control"
+                                                               id="newfolder{{ file.id }}"
+                                                               placeholder="{{ file.folder_name }}"
+                                                               aria-describedby="basic-addon1" name="new_folder_name">
+
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-danger pull-left"
+                                                            data-dismiss="modal">关闭
+                                                    </button>
+                                                    <input type="submit" value="重命名" class="btn btn-info">
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!---->
+                                <a class=" btn btn-danger" onclick="firm()" id="deletefolder_{{ file.folder_name }}">
+                                    <i class="fa fa-trash fa-lg" aria-hidden="true"></i> 删除</a>
+                                <script>
+                                    function firm() {
+                                        var pwd = $('#pwd').text();
+                                        var folder_name = '{{ file.folder_name }}';
+                                        //利用对话框返回的值 （true 或者 false）
+                                        if (confirm("删除该文件夹将删除其下的所有文件及目录!")) {
+                                            $('#deletefolder_{{ file.folder_name }}').attr('href', '/delete_folder/?pwd=' + pwd + '&folder_name=' + folder_name);
+                                        } else {
+                                            $('#deletefolder_{{ file.folder_name }}').attr('href', '#');
+                                        }
+                                    }
+                                </script>
+                            </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
                 </tbody>

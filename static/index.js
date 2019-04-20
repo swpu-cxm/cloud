@@ -1,4 +1,6 @@
 $(document).ready(function () {
+
+
         //排序js开始
         $('th').each(function (i) {
                 var sort_direction = 1; //排序标志，1为升序，-1为降序
@@ -36,17 +38,17 @@ $(document).ready(function () {
             $.ajax({
                 type: "get",
                 dataType: "json",
-                url: "/type/?file_type=" + type,
+                url: "/file_type/?file_type=" + type,
                 success: function (data) {
                     var tr = $('<tr></tr>');
                     var all_tr = '';
+                    var pwd = $('#pwd').text();
                     for (var i = 0; i < data.length; i++) {
-                        var tr = '<tr></tr><td><a href="../static' + data[i].full_path + '">' + data[i].file_name + '</a></td>\n' +
+                        var tr = '<tr></tr><td style="text-align: left"><a href="/static/' + data[i].file_path + '"><i class="fa fa-file fa-lg"></i> ' + data[i].file_name + '</a></td>\n' +
                             '<td>' + data[i].file_size + '</td>\n' +
                             '<td>' + data[i].update_time + '</td>\n' +
-                            '<td><a href="/download_file/?file_path=' + data[i].full_path + '">下载</a>\n' +
-                            '&nbsp;&nbsp;&nbsp;\n' +
-                            '<a href="/delete_file/?file_path=' + data[i].full_path + '">删除</a>\n' +
+                            '<td><a class="btn btn-success" href="/download_file/?file_path=' + data[i].file_path + '"><i class="fa fa-cloud-download fa-lg" aria-hidden="true"></i> 下载</a> ' +
+                            '<a class="btn btn-danger"  href="/delete_file/?pwd=' + pwd + '&file_path=' + data[i].file_path + '"><i class="fa fa-trash fa-lg" aria-hidden="true"></i> 删除</a> \n' +
                             '</td></tr>'
                         all_tr = all_tr + tr;
                     }
@@ -70,12 +72,12 @@ $(document).ready(function () {
                     var tr = $('<tr></tr>');
                     var all_tr = '';
                     for (var i = 0; i < data.length; i++) {
-                        var tr = '<tr></tr><td><a href="../static' + data[i].full_path + '">' + data[i].file_name + '</a></td>\n' +
+                        var tr = '<tr></tr><td style="text-align: left"><a href="/static/' + data[i].file_path + '"><i class="fa fa-file fa-lg"></i> ' + data[i].file_name + '</a></td>\n' +
                             '<td>' + data[i].file_size + '</td>\n' +
                             '<td>' + data[i].update_time + '</td>\n' +
-                            '<td><a href="/download_file/?file_path=' + data[i].full_path + '">下载</a>\n' +
+                            '<td><a class="btn btn-success" href="/download_file/?file_path=' + data[i].file_path + '"><i class="fa fa-cloud-download fa-lg" aria-hidden="true"></i> 下载</a>\n' +
                             '&nbsp;&nbsp;&nbsp;\n' +
-                            '<a href="/delete_file/?file_path=' + data[i].full_path + '">删除</a>\n' +
+                            '<a class="btn btn-danger"  href="/delete_file/?pwd=' + pwd + '&file_path=' + data[i].file_path + '"><i class="fa fa-trash fa-lg" aria-hidden="true"></i> 删除</a>\n' +
                             '</td></tr>'
                         all_tr = all_tr + tr;
                     }
@@ -105,6 +107,94 @@ $(document).ready(function () {
             var filename = arrs[arrs.length - 1];
             $(".show").html(filename);
         });
+
+        //上传文件开始
+        $("#upload").click(function () {
+            //创建FormData对象，初始化为form表单中的数据。需要添加其他数据可使用formData.append("property", "value");
+            $('.progress').show();
+            var formData = new FormData();
+
+            //var formData = new FormData($('form')[0]);
+            var name = $("input").val();
+
+            formData.append("file", $("#file")[0].files[0]);
+
+            formData.append("name", name);
+
+            formData.append('file_path', $('#pwd').text());
+
+            //ajax异步上传
+            $.ajax({
+                url: "/upload_file/",
+                type: "POST",
+                dataType: "json",
+                data: formData,
+                headers: {"X-CSRFToken": $.cookie('csrftoken')},
+                xhr: function () { //获取ajaxSettings中的xhr对象，为它的upload属性绑定progress事件的处理函数
+
+                    myXhr = $.ajaxSettings.xhr();
+                    if (myXhr.upload) { //检查upload属性是否存在
+                        //绑定progress事件的回调函数
+                        myXhr.upload.addEventListener('progress', progressHandlingFunction, false);
+                    }
+                    return myXhr; //xhr对象返回给jQuery使用
+                },
+                success: function (result) {
+
+                },
+                contentType: false, //必须false才会自动加上正确的Content-Type
+                processData: false  //必须false才会避开jQuery对 formdata 的默认处理
+            });
+        })
+
+        //上传进度回调函数：
+        function progressHandlingFunction(e) {
+            if (e.lengthComputable) {
+                //$('.progress > div').attr({value: e.loaded, max: e.total}); //更新数据到进度条
+                var percent = e.loaded / e.total * 100;
+                $('#prog').html(percent.toFixed(2) + "%");
+                $('#prog').css('width', percent.toFixed(2) + "%");
+            }
+        }
+
+        //上传文件结束
+
+        //关闭模态框事件
+        $('#myModal').on('hidden.bs.modal', function (e) {
+            $('.progress').hide();
+            window.location.reload();
+        })
+        //关闭模态框事件
+
+        // //为文件添加图标开始
+        //
+        // $("tbody").on('click', '.dir', function (event) {
+        //     var pdir = event.target.name;
+        //     //var type = event.target.className.split(" ")[0];
+        //     $.ajax({
+        //         type: "get",
+        //         dataType: "json",
+        //         url: "/folder/?pdir=" + pdir,
+        //         success: function (data) {
+        //             var all_tr = '';
+        //             for (var i = 0; i < data.length; i++) {
+        //                 if (data[i].is_file) {
+        //                     var td1 = '<td style="text-align: left"><a href="javascript:void(0);" ><i class="fa fa-file fa-lg"></i>' + data[i].file_name + '</a></td>';
+        //                     var td2 = '<td>'+ data[i].file_size +'</td>';
+        //                 } else {
+        //                     var td1 = '<td style="text-align: left"><a href="javascript:void(0);" class="dir" name="' + data[i].file_name + '"><i class="fa fa-folder-o fa-lg"></i>' + data[i].file_name + '</a></td>';
+        //                     var td2 = '<td>---</td>';
+        //                 }
+        //                 var td3 = ' <td>'+ data[i].update_time +'</td>';
+        //                 var td4 = '<td> <a href="/download_file/?file_path={{ file.full_path }}">下载</a> &nbsp;&nbsp;&nbsp;<a href="/delete_file/?file_path={{ file.full_path }}">删除</a> </td>';
+        //                 all_tr = all_tr + '<tr>' + td1 + td2 + td3 + td4 + '</tr>';
+        //             }
+        //             $('#myTable tbody').html(all_tr);
+        //         }
+        //     })
+        // })
+        //
+        // //为文件添加图标结束
     }
 );
 

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from index import models
-from django.http import FileResponse, JsonResponse
+from django.http import FileResponse, JsonResponse, HttpResponse
 import os
 from index.untils import judge_filepath, format_size
 from django.utils import timezone
@@ -8,6 +8,7 @@ from django.utils.http import urlquote
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+import shutil
 
 # Create your views here.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,30 +17,155 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 @login_required
 def index(request):
     user = request.user
-    main_dir = '/' + str(user)
-    file_list = models.FileInfo.objects.filter(main_dir=main_dir)
-    return render(request, 'index.html', {'file_list': file_list, 'username': str(user)})
+    user_id = User.objects.get(username=user).id
+    file_obj = models.FileInfo.objects.filter(user_id=user_id, belong_folder='')
+    folder_obj = models.FolderInfo.objects.filter(user_id=user_id, belong_folder='')
+    index_list = []
+    for file in file_obj:
+        file.is_file = True
+        index_list.append(file)
+    for folder in folder_obj:
+        folder.is_file = False
+        index_list.append(folder)
+    breadcrumb_list = [{'tag': '全部文件', 'uri': ''}]
+    return render(request, 'index.html',
+                  {'index_list': index_list, 'username': str(user), 'breadcrumb_list': breadcrumb_list})
+
+
+@login_required
+def folder(request):
+    user = request.user
+    user_id = User.objects.get(username=user).id
+    pdir = request.GET.get('pdir')
+    if pdir:
+        if pdir[-1:] == '/':
+            belong_folder = pdir
+        else:
+            belong_folder = pdir + '/'
+    else:
+        belong_folder = ''
+    file_obj = models.FileInfo.objects.filter(user_id=user_id, belong_folder=belong_folder)
+    folder_obj = models.FolderInfo.objects.filter(user_id=user_id, belong_folder=belong_folder)
+    index_list = []
+    for file in file_obj:
+        file.is_file = True
+        index_list.append(file)
+    for folder in folder_obj:
+        folder.is_file = False
+        index_list.append(folder)
+    breadcrumb_list = [{'tag': '全部文件', 'uri': ''}]
+    uri = ''
+    for value in pdir.split('/'):
+        if value:
+            uri = uri + value + '/'
+            breadcrumb_list.append({'tag': value, 'uri': uri})
+    return render(request, 'index.html',
+                  {'index_list': index_list, 'username': str(user), 'breadcrumb_list': breadcrumb_list})
 
 
 @login_required
 def delete_file(request):
     user = str(request.user)
+    user_id = User.objects.get(username=user).id
     file_path = request.GET.get('file_path')
-    file_name = file_path.split('/')[-1]
-    main_dir = '/' + user
-    models.FileInfo.objects.get(file_name=file_name, main_dir=main_dir).delete()
+    pwd = request.GET.get('pwd')
+    models.FileInfo.objects.get(file_path=file_path, user_id=user_id).delete()
     try:
-        os.remove(BASE_DIR + '/static' + file_path)
+        os.remove(BASE_DIR + '/static/' + file_path)
     except Exception as e:
-        pass
-    return redirect('/')
+        print(e)
+    return redirect('/folder/?pdir=' + pwd)
+
+
+@login_required
+def rename_file(request):
+    user = str(request.user)
+    user_id = User.objects.get(username=user).id
+    old_file_name = request.GET.get('old_file_name')
+    file_type = old_file_name.split('.')[-1]
+    new_file_name = request.GET.get('new_file_name')+'.'+file_type
+    pwd = request.GET.get('pwd')
+    file_obj = models.FileInfo.objects.get(belong_folder=pwd, file_name=old_file_name, user_id=user_id)
+    old_path = file_obj.file_path
+    new_path = old_path.replace(old_file_name, new_file_name)
+    file_obj.file_path = new_path
+    old_full_path = BASE_DIR + '/static/' + old_path
+    new_full_path = BASE_DIR + '/static/' + new_path
+    os.rename(old_full_path, new_full_path)
+    file_obj.file_name = new_file_name
+    file_obj.save()
+    return redirect('/folder/?pdir=' + pwd)
+    # models.FileInfo.objects.get(file_path=file_path, user_id=user_id).delete()
+
+
+@login_required
+def rename_folder(request):
+    user = str(request.user)
+    user_id = User.objects.get(username=user).id
+    old_folder_name = request.GET.get('old_folder_name')
+    new_folder_name = request.GET.get('new_folder_name')
+    pwd = request.GET.get('pwd')
+    folder_obj = models.FolderInfo.objects.get(belong_folder=pwd, folder_name=old_folder_name, user_id=user_id)
+    folder_obj.folder_name = new_folder_name
+    old_belong_folder = folder_obj.belong_folder + old_folder_name + '/'
+    new_belong_folder = folder_obj.belong_folder + new_folder_name + '/'
+    old_full_path = BASE_DIR + '/static/' + user + '/' + old_belong_folder
+    new_full_path = BASE_DIR + '/static/' + user + '/' + new_belong_folder
+    os.rename(old_full_path, new_full_path)
+    folder_belong_folder_objs = models.FolderInfo.objects.filter(belong_folder__startswith=old_belong_folder,
+                                                                 user_id=user_id)
+    for folder_belong_folder_obj in folder_belong_folder_objs:
+        tmp_belong_folder = folder_belong_folder_obj.belong_folder.replace(old_belong_folder, new_belong_folder)
+        folder_belong_folder_obj.belong_folder = tmp_belong_folder
+        folder_belong_folder_obj.save()
+    file_belong_folder_objs = models.FileInfo.objects.filter(belong_folder__startswith=old_belong_folder,
+                                                             user_id=user_id)
+    for file_belong_folder_obj in file_belong_folder_objs:
+        tmp_belong_folder = file_belong_folder_obj.belong_folder.replace(old_belong_folder, new_belong_folder)
+        file_belong_folder_obj.belong_folder = tmp_belong_folder
+        file_belong_folder_obj.save()
+    folder_obj.save()
+    return redirect('/folder/?pdir=' + pwd)
+
+
+@login_required
+def delete_folder(request):
+    user = request.user
+    pwd = request.GET.get('pwd')
+    folder_name = request.GET.get('folder_name')
+    try:
+        models.FolderInfo.objects.filter(belong_folder__contains=folder_name).delete()
+        models.FolderInfo.objects.filter(folder_name=folder_name).delete()
+        models.FileInfo.objects.filter(belong_folder__contains=folder_name).delete()
+        rm_dir = BASE_DIR + '/static/' + str(user) + '/' + pwd + folder_name
+        shutil.rmtree(rm_dir)
+    except Exception as e:
+        print(e)
+    return redirect('/folder/?pdir=' + pwd)
+
+
+@login_required
+def mkdir(request):
+    user = request.user
+    user_id = User.objects.get(username=user).id
+    pwd = request.GET.get('pwd')
+    folder_name = request.GET.get('folder_name')
+    update_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
+    try:
+        models.FolderInfo.objects.create(user_id=user_id, folder_name=folder_name, belong_folder=pwd,
+                                         update_time=update_time)
+        user_path = os.path.join(BASE_DIR, 'static', str(user))
+        os.mkdir(user_path + '/' + pwd + folder_name)
+    except Exception as e:
+        print(e)
+    return redirect('/folder/?pdir=' + pwd)
 
 
 @login_required
 def download_file(request):
     file_path = request.GET.get('file_path')
     file_name = file_path.split('/')[-1]
-    file_dir = BASE_DIR + '/static' + file_path
+    file_dir = BASE_DIR + '/static/' + file_path
     file = open(file_dir, 'rb')
     response = FileResponse(file)
     response['Content-Type'] = 'application/octet-stream'
@@ -53,37 +179,38 @@ def upload_file(request):
         user_name = str(request.user)
         user_obj = User.objects.get(username=user_name)
         file_obj = request.FILES.get('file')
-        file_type = file_obj.name.split('.')[-1].lower()
-        file_path = judge_filepath(file_type)
+        file_type = judge_filepath(file_obj.name.split('.')[-1].lower())
+        pwd = request.POST.get('file_path')
+
         update_time = timezone.now().strftime("%Y-%m-%d %H:%M:%S")
         file_size = format_size(file_obj.size)
         file_name = file_obj.name
-        main_dir = '/' + str(user_name)
-        full_path = main_dir + file_path + file_name
-        models.FileInfo.objects.create(user_id=user_obj.id, main_dir=main_dir, file_path=file_path,
+        save_path = BASE_DIR + '/static/' + user_name + '/' + pwd
+        file_path = user_name + '/' + pwd + file_name
+        # print(belong_folder, folder_name, save_path)
+        models.FileInfo.objects.create(user_id=user_obj.id, file_path=file_path,
                                        file_name=file_name, update_time=update_time, file_size=file_size,
-                                       file_type=file_type, full_path=full_path)
-        with open(BASE_DIR + '/static' + full_path, 'wb+') as f:
+                                       file_type=file_type, belong_folder=pwd)
+        with open(save_path + file_name, 'wb+') as f:
             for chunk in file_obj.chunks():
                 f.write(chunk)
         return redirect('/')
 
 
 @login_required
-def type(request):
-    file_type = request.GET.get('file_type')
-    file_list = []
+def file_type(request):
     user = request.user
-    main_dir = '/' + str(user)
+    file_type = request.GET.get('file_type')
+    user_id = User.objects.get(username=user).id
+    file_list = []
     if file_type == 'all':
-        file_obj = models.FileInfo.objects.filter(main_dir=main_dir)
+        file_obj = models.FileInfo.objects.filter(user_id=user_id)
     else:
-        file_obj = models.FileInfo.objects.filter(file_path="/{}/".format(file_type), main_dir=main_dir)
+        file_obj = models.FileInfo.objects.filter(file_type=file_type, user_id=user_id)
     for file in file_obj:
-        file_list.append({'main_dir': file.main_dir, 'file_path': file.file_path, 'file_name': file.file_name,
+        file_list.append({'file_path': file.file_path, 'file_name': file.file_name,
                           'update_time': str(file.update_time), 'file_size': file.file_size,
-                          'file_type': file.file_type,
-                          'full_path': file.full_path})
+                          'file_type': file.file_type})
     return JsonResponse(file_list, safe=False)
 
 
@@ -91,19 +218,17 @@ def type(request):
 def search(request):
     file_type = request.GET.get('file_type')
     file_name = request.GET.get('file_name')
-    file_list = []
     user = request.user
-    main_dir = '/' + str(user)
+    user_id = User.objects.get(username=user).id
+    file_list = []
     if file_type == 'all':
-        file_obj = models.FileInfo.objects.filter(file_name__icontains=file_name, main_dir=main_dir)
+        file_obj = models.FileInfo.objects.filter(file_name__icontains=file_name, user_id=user_id)
     else:
-        file_obj = models.FileInfo.objects.filter(file_path="/{}/".format(file_type), file_name__icontains=file_name,
-                                                  main_dir=main_dir)
+        file_obj = models.FileInfo.objects.filter(file_type=file_type, file_name__icontains=file_name, user_id=user_id)
     for file in file_obj:
-        file_list.append({'main_dir': file.main_dir, 'file_path': file.file_path, 'file_name': file.file_name,
+        file_list.append({'file_path': file.file_path, 'file_name': file.file_name,
                           'update_time': str(file.update_time), 'file_size': file.file_size,
-                          'file_type': file.file_type,
-                          'full_path': file.full_path})
+                          'file_type': file.file_type})
     return JsonResponse(file_list, safe=False)
 
 
@@ -134,10 +259,7 @@ def register(request):
                 User.objects.create_user(username=username, password=password)
             except Exception as e:
                 return render(request, 'register.html', {'info': '用户已存在'})
-            file_type_list = ['doc', 'img', 'procedure', 'video', 'others']
             os.mkdir(user_path)
-            for file_type in file_type_list:
-                os.mkdir(os.path.join(user_path, file_type))
         else:
             return render(request, 'register.html', {'info': '两次密码不一致'})
         return redirect('/login')

@@ -6,15 +6,15 @@ def judge_filepath(file_type):
                   'vqf']
     procedure_list = ['exe', 'py', 'java', 'class', 'pyc', 'app', 'apk', 'bat']
     if file_type in img_list:
-        file_path = '/img/'
+        file_path = 'img'
     elif file_type in doc_list:
-        file_path = '/doc/'
+        file_path = 'doc'
     elif file_type in video_list:
-        file_path = '/video/'
+        file_path = 'video'
     elif file_type in procedure_list:
-        file_path = '/procedure/'
+        file_path = 'procedure'
     else:
-        file_path = '/others/'
+        file_path = 'others'
     return file_path
 
 

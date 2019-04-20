@@ -13,7 +13,7 @@ tr th, td {
 .blueButton {
     position: absolute;
     display: block;
-    width: 90%;
+    width: 95%;
     height: 40px;
     background-color: #00b3ee;
     color: #fff;
@@ -46,3 +46,6 @@ tr th, td {
     height: 30px;
     font: normal normal normal 14px/30px 'Microsoft YaHei';
 }
+
+
+
