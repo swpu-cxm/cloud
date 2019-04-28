@@ -1,7 +1,7 @@
 # 项目介绍:个人简易云盘,基于Django框架
 ### 环境:python 3.7,Django 2.1.7,mysql 5.7,pymysql 0.9.3, Bootstrap 3.3.7,jQuery v3.3.1
 ## 项目浏览: [私人云盘](http://yun.cxmgxj.cn/ "私人云盘")
-![avatar](http://blog.cxmgxj.cn/media/editor/cloud_20190428155518171788.png)
+![avatar](https://github.com/swpu-cxm/cloud/blob/master/cloud.png)
 ## 基本功能:
 + 1.用户注册,登录,用户数据存放在mysql中,为Django的user_auth表
 + 2.创建用户目录,目录名为用户名,并在用户主下面建立五个分类子目录
