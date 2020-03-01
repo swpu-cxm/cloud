@@ -1,6 +1,6 @@
 # 项目介绍:个人简易云盘,基于Django框架
 ### 环境:python 3.7,Django 2.1.7,mysql 5.7,pymysql 0.9.3, Bootstrap 3.3.7,jQuery v3.3.1
-## 项目浏览: [私人云盘](http://yun.cxmgxj.cn/ "私人云盘")
+## 项目预览:
 ![avatar](https://github.com/swpu-cxm/cloud/blob/master/cloud.png)
 ## 基本功能:
 + 1.用户注册,登录,用户数据存放在mysql中,为Django的user_auth表
@@ -18,6 +18,8 @@
   + 4.加了一些好看的图标...
 ## 如何使用:
 ### 1. 安装虚拟环境
+  git clone https://github.com/swpu-cxm/cloud.git
+
     cd cloud  
     
     pipenv install --dev  
