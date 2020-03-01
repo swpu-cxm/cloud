@@ -18,7 +18,7 @@
   + 4.加了一些好看的图标...
 ## 如何使用:
 ### 1. 安装虚拟环境
-  git clone https://github.com/swpu-cxm/cloud.git
+    git clone https://github.com/swpu-cxm/cloud.git
 
     cd cloud  
     
